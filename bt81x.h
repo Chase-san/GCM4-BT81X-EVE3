@@ -42,22 +42,24 @@ struct bt81xcfg {
 };
 
 extern const bt81xcfg_t rvt70eve3;
-extern const bt81xcfg_t unknown_eve;
+extern const bt81xcfg_t rvt70eve3_alt;
 
 uint32_t bt81x_read_chipid();
 uint32_t bt81x_read_frequency();
 
-void bt81x_cmd_active();
-void bt81x_cmd_standby();
-void bt81x_cmd_clockext();
-void bt81x_cmd_clockint();
-void bt81x_cmd_sleep();
-void bt81x_cmd_powerdown();
-void bt81x_cmd_reset();
+/* host commands */
+void bt81x_hc_active();
+void bt81x_hc_standby();
+void bt81x_hc_clockext();
+void bt81x_hc_clockint();
+void bt81x_hc_sleep();
+void bt81x_hc_powerdown();
+void bt81x_hc_reset();
 
 void bt81x_init(const bt81xcfg_t *config);
 
 void bt81x_gfx_clear();
+void bt81x_gfx_clear_white();
 void bt81x_demo_loop();
 
 #ifdef __cplusplus

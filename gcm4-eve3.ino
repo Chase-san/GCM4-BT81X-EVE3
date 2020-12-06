@@ -23,11 +23,10 @@ void setup() {
   device_init();
 
   delay(1000);
-  delay(1000);
 
   Serial.println("Starting Eve3.");
 
-  bt81x_init(&rvt70eve3_alt);
+  bt81x_init(&rvt70eve3);
   Serial.printf("Chip ID %08x\n", bt81x_read_chipid());
   Serial.printf("Freq %08d Hz\n", bt81x_read_frequency());
 
@@ -35,9 +34,6 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
   bt81x_demo_loop();
-  delay(250);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(250);
+  delay(1);
 }

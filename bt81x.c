@@ -127,14 +127,18 @@
 
 /* display list commands */
 #define BEGIN(prim)              (0x1F000000 | (prim))
+#define BITMAP_HANDLE(handle)    (0x5000000 | (handle))
+#define CELL(cell)               (0x6000000 | (cell))
 #define CLEAR_COLOR_RGB(r, g, b) (0x2000000 | ((r) << 16) | ((b) << 8) | (g))
 #define CLEAR(c, s, t)           (0x26000000 | ((c) << 2) | ((s) << 1) | (t))
 #define COLOR_RGB(r, g, b)       (0x4000000 | ((r) << 16) | ((b) << 8) | (g))
 #define DISPLAY()                0x0
 #define END()                    0x21000000
 #define POINT_SIZE(size)         (0xD000000 | (size))
+#define VERTEX2F(x, y)           (0x40000000 | ((x) << 15) | (y))
 #define VERTEX2II(x, y, handle, cell) \
   (0x80000000 | ((x) << 21) | ((y) << 12) | ((handle) << 7) | (cell))
+#define VERTEX_FORMAT(frac) (0x27000000 | (frac))
 
 /* display list command params */
 #define BITMAPS      1
@@ -149,57 +153,10 @@
 
 /* built in configurations */
 const bt81xcfg_t rvt70eve3 = {
-    1056, /* hcycle */
-    246,  /* hoffset */
-    210,  /* hsync0 */
-    230,  /* hsync1 */
-    525,  /* vcycle */
-    45,   /* voffset */
-    22,   /* vsync0 */
-    35,   /* vsync1 */
-    0,    /* swizzle */
-    2,    /* pclk */
-    1,    /* pclk_pol */
-    0,    /* cspread */
-    1,    /* dither */
-    800,  /* hsize */
-    480   /* vsize */
-};
-
-const bt81xcfg_t rvt70eve3_alt = {
-    1056, /* hcycle */
-    46,   /* hoffset */
-    0,    /* hsync0 */
-    10,   /* hsync1 */
-    525,  /* vcycle */
-    23,   /* voffset */
-    0,    /* vsync0 */
-    10,   /* vsync1 */
-    0,    /* swizzle */
-    2,    /* pclk */
-    1,    /* pclk_pol */
-    0,    /* cspread */
-    1,    /* dither */
-    800,  /* hsize */
-    480   /* vsize */
-};
-
-const bt81xcfg_t unknown_eve = {
-    928, /* hcycle */
-    88,  /* hoffset */
-    0,   /* hsync0 */
-    48,  /* hsync1 */
-    525, /* vcycle */
-    32,  /* voffset */
-    0,   /* vsync0 */
-    3,   /* vsync1 */
-    0,   /* swizzle */
-    2,   /* pclk */
-    1,   /* pclk_pol */
-    0,   /* cspread */
-    1,   /* dither */
-    800, /* hsize */
-    480  /* vsize */
+    /* */
+    .hcycle = 1056, .hoffset = 46, .hsync0 = 0,  .hsync1 = 10, .vcycle = 525,
+    .voffset = 23,  .vsync0 = 0,   .vsync1 = 10, .swizzle = 0, .pclk = 2,
+    .pclk_pol = 1,  .cspread = 0,  .dither = 1,  .hsize = 800, .vsize = 480,
 };
 
 void wr(const uint32_t address, const uint8_t *data, const uint16_t size) {
@@ -253,10 +210,19 @@ uint32_t rd32(const uint32_t address) {
   return (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
-// void cmd(const uint32_t cmd);
+/**
+ * Display List Memory Offset
+ */
+uint32_t __dlmo = 0;
 
-void wdla(const uint32_t address, const uint32_t data) {
-  wr32(RAM_DL + address, data);
+inline void dlreset() {
+  __dlmo = 0;
+}
+
+inline void dl(const uint32_t data) {
+  // TODO ensure we are not over display list ram memory limit of 8 KB
+  wr32(RAM_DL + __dlmo, data);
+  __dlmo += 4;
 }
 
 void host_command(const uint8_t cmd) {
@@ -283,38 +249,38 @@ uint32_t bt81x_read_frequency() {
   return rd32(REG_FREQUENCY);
 }
 
-void bt81x_cmd_active() {
+void bt81x_hc_active() {
   host_command(ACTIVE);
 }
 
-void bt81x_cmd_standby() {
+void bt81x_hc_standby() {
   host_command(STANDBY);
 }
 
-void bt81x_cmd_clockext() {
+void bt81x_hc_clockext() {
   host_command(CLKEXT);
 }
 
-void bt81x_cmd_clockint() {
+void bt81x_hc_clockint() {
   host_command(CLKINT);
 }
 
-void bt81x_cmd_sleep() {
+void bt81x_hc_sleep() {
   host_command(SLEEP);
 }
 
-void bt81x_cmd_powerdown() {
+void bt81x_hc_powerdown() {
   host_command(PWRDOWN);
 }
 
-void bt81x_cmd_reset() {
+void bt81x_hc_reset() {
   host_command(RST_PULSE);
 }
 
 void bt81x_init(const bt81xcfg_t *config) {
-  bt81x_cmd_clockext();
-  bt81x_cmd_active();
-  bt81x_cmd_active();
+  bt81x_hc_clockext();
+  bt81x_hc_active();
+  bt81x_hc_active();
   device_delay(300);
 
   // wait to be active
@@ -348,10 +314,10 @@ void bt81x_init(const bt81xcfg_t *config) {
   wr16(REG_VSIZE, config->vsize);
 
   // Set Disp GPIO Direction
-  wr16(REG_GPIOX_DIR, 0x8000);
+  wr16(REG_GPIOX_DIR, 0x8000);  // 0x8000
 
   // Enable Disp (if used)
-  wr16(REG_GPIOX, 0x8000);
+  wr16(REG_GPIOX, 0x8000);  // 0x8000
 
   // Backlight PWM frequency
   wr16(REG_PWM_HZ, 0xFA);
@@ -359,33 +325,80 @@ void bt81x_init(const bt81xcfg_t *config) {
   // Backlight PWM duty (on)
   wr8(REG_PWM_DUTY, 32);
 
-  bt81x_gfx_clear();
+  // bt81x_gfx_clear_white();
+  // bt81x_gfx_clear();
+  // bt81x_demo_loop();
+  bt81x_demo_loop();
 
   // set pclk to half
   wr8(REG_PCLK, config->pclk);
 }
 
 void bt81x_gfx_clear() {
-  wdla(0, CLEAR_COLOR_RGB(0, 0, 0));
-  wdla(4, CLEAR(1, 1, 1));
-  wdla(8, DISPLAY());
+  dlreset();
+  dl(CLEAR_COLOR_RGB(0, 0, 0));
+  dl(CLEAR(1, 1, 1));
+  dl(DISPLAY());
   wr8(REG_DLSWAP, DLSWAP_FRAME);
 }
 
+void bt81x_gfx_clear_white() {
+  dlreset();
+  dl(CLEAR_COLOR_RGB(0xFF, 0xFF, 0xFF));
+  dl(CLEAR(1, 1, 1));
+  dl(DISPLAY());
+  wr8(REG_DLSWAP, DLSWAP_FRAME);
+}
+
+void bt81x_draw_text(const int16_t x, const int16_t y, const int16_t dx,
+                     const int16_t dy, const uint8_t handle, const char *text,
+                     const size_t length) {
+  int16_t tx = x;
+  int16_t ty = y;
+  dl(BEGIN(BITMAPS));
+  dl(BITMAP_HANDLE(handle));
+  for (int i = 0; i < length; ++i) {
+    dl(CELL(text[i]));
+    dl(VERTEX2F(tx, ty));
+    tx += dx;
+    ty += dy;
+  }
+  dl(END());
+}
+
 void bt81x_demo_loop() {
-  wdla(0, CLEAR(1, 1, 1));                 // clear screen
-  wdla(4, BEGIN(BITMAPS));                 // start drawing bitmaps
-  wdla(8, VERTEX2II(220, 110, 31, 'T'));   // ascii T in font 31
-  wdla(12, VERTEX2II(244, 110, 31, 'E'));  // ascii E
-  wdla(16, VERTEX2II(270, 110, 31, 'X'));  // ascii X
-  wdla(20, VERTEX2II(299, 110, 31, 'T'));  // ascii T
-  wdla(24, END());
-  wdla(28, COLOR_RGB(160, 22, 22));     // change colour to red
-  wdla(32, POINT_SIZE(320));            // set point size to 20 pixels in radius
-  wdla(36, BEGIN(POINTS));              // start drawing points
-  wdla(40, VERTEX2II(192, 133, 0, 0));  // red point
-  wdla(44, END());
-  wdla(48, DISPLAY());  // display the image
+  const int16_t br = 20 * 16;
+  static int16_t bx = br;
+  static int16_t by = br;
+
+  static int8_t dx = 2;
+  static int8_t dy = 2;
+
+  dlreset();
+  dl(CLEAR_COLOR_RGB(0, 0, 0));
+  dl(CLEAR(1, 1, 1));  // clear screen
+
+  dl(COLOR_RGB(240, 16, 16));  // change colour to red
+  dl(POINT_SIZE(br));          // set point size to 20 pixels in radius
+  dl(BEGIN(POINTS));           // start drawing points
+  dl(VERTEX2F(bx, by));        // red point
+  dl(END());
+
+  dl(VERTEX_FORMAT(0));             // no subpixel precision please
+  dl(COLOR_RGB(0xFF, 0xFF, 0xFF));  // change colour to black
+  bt81x_draw_text(350, 240 - 25, 25, 0, 31, "TEST", 4);
+
+  dl(DISPLAY());  // display the image
 
   wr8(REG_DLSWAP, DLSWAP_FRAME);
+
+  // update ball movement
+  bx += dx;
+  by += dy;
+  if (bx >= 800 * 16 - br || bx <= br) {
+    dx = -dx;
+  }
+  if (by >= 480 * 16 - br || by <= br) {
+    dy = -dy;
+  }
 }
