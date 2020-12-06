@@ -277,6 +277,14 @@ void bt81x_hc_reset() {
   host_command(RST_PULSE);
 }
 
+/**
+ * Sets the backlight brightness level.
+ * @param level 0-255 level of the backlight. 0 = off, 255 = max brightness.
+ */
+void bt81x_set_backlight(const uint8_t level) {
+  wr8(REG_PWM_DUTY, level >> 1);
+}
+
 void bt81x_init(const bt81xcfg_t *config) {
   bt81x_hc_clockext();
   bt81x_hc_active();
@@ -366,6 +374,11 @@ void bt81x_draw_text(const int16_t x, const int16_t y, const int16_t dx,
   dl(END());
 }
 
+uint32_t cps = 0;
+void bt81x_demo_cps(uint32_t cycles) {
+  cps = cycles;
+}
+
 void bt81x_demo_loop() {
   const int16_t br = 20 * 16;
   static int16_t bx = br;
@@ -387,6 +400,11 @@ void bt81x_demo_loop() {
   dl(VERTEX_FORMAT(0));             // no subpixel precision please
   dl(COLOR_RGB(0xFF, 0xFF, 0xFF));  // change colour to black
   bt81x_draw_text(350, 240 - 25, 25, 0, 31, "TEST", 4);
+
+  // draw fps
+  char buf[16] = {0};
+  snprintf(buf, 16, "cps: %u", cps);
+  bt81x_draw_text(0, 0, 11, 0, 20, buf, strlen(buf));
 
   dl(DISPLAY());  // display the image
 

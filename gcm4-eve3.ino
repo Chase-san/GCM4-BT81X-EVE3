@@ -33,7 +33,17 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
 }
 
+uint32_t cycles = 0;
+uint64_t lastTime = 0;
 void loop() {
+  uint64_t time = millis();
+
+  if (time - lastTime >= 1000) {
+    bt81x_demo_cps(cycles);
+    cycles = 0;
+    lastTime = time;
+  }
+  ++cycles;
+
   bt81x_demo_loop();
-  delay(1);
 }

@@ -60,6 +60,8 @@ void bt81x_init(const bt81xcfg_t *config);
 
 void bt81x_gfx_clear();
 void bt81x_gfx_clear_white();
+
+void bt81x_demo_cps(uint32_t cycles);
 void bt81x_demo_loop();
 
 #ifdef __cplusplus
