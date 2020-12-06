@@ -14,25 +14,22 @@
  */
 
 #include "bt81x.h"
-#include "bt81x_device.h"
+#include "device.h"
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  bt81x_init();
+  device_init();
 
   delay(1000);
   delay(1000);
 
   Serial.println("Starting Eve3.");
 
-  bt81x_start();
+  bt81x_init(&rvt70eve3_alt);
   Serial.printf("Chip ID %08x\n", bt81x_read_chipid());
   Serial.printf("Freq %08d Hz\n", bt81x_read_frequency());
-
-  bt81x_configure(&bt81x_eve3_70);
-  Serial.println("Eve3 ready.");
 
   digitalWrite(LED_BUILTIN, LOW);
 }

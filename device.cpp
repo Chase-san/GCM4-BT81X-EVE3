@@ -20,7 +20,7 @@
 void device_init() {
   Serial.begin(9600);
   SPI.begin();
-  pinMode(device_CS, OUTPUT);
+  pinMode(BT81X_CS, OUTPUT);
 }
 
 void device_delay(const uint32_t ms) {
@@ -28,12 +28,12 @@ void device_delay(const uint32_t ms) {
 }
 
 void device_spi_start() {
-  SPI.beginTransaction(SPISettings(device_BAUD, MSBFIRST, SPI_MODE0));
-  digitalWrite(device_CS, LOW);
+  SPI.beginTransaction(SPISettings(BT81X_BAUD, MSBFIRST, SPI_MODE0));
+  digitalWrite(BT81X_CS, LOW);
 }
 
 void device_spi_end() {
-  digitalWrite(device_CS, HIGH);
+  digitalWrite(BT81X_CS, HIGH);
   SPI.endTransaction();
 }
 

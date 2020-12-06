@@ -148,7 +148,7 @@
 #define RECTS        9
 
 /* built in configurations */
-const bt81xcfg_t bt81x_eve3_70 = {
+const bt81xcfg_t rvt70eve3 = {
     1056, /* hcycle */
     246,  /* hoffset */
     210,  /* hsync0 */
@@ -166,7 +166,25 @@ const bt81xcfg_t bt81x_eve3_70 = {
     480   /* vsize */
 };
 
-const bt81xcfg_t bt81x_eve2_70 = {
+const bt81xcfg_t rvt70eve3_alt = {
+    1056, /* hcycle */
+    46,   /* hoffset */
+    0,    /* hsync0 */
+    10,   /* hsync1 */
+    525,  /* vcycle */
+    23,   /* voffset */
+    0,    /* vsync0 */
+    10,   /* vsync1 */
+    0,    /* swizzle */
+    2,    /* pclk */
+    1,    /* pclk_pol */
+    0,    /* cspread */
+    1,    /* dither */
+    800,  /* hsize */
+    480   /* vsize */
+};
+
+const bt81xcfg_t unknown_eve = {
     928, /* hcycle */
     88,  /* hoffset */
     0,   /* hsync0 */
@@ -293,7 +311,7 @@ void bt81x_cmd_reset() {
   host_command(RST_PULSE);
 }
 
-void bt81x_start() {
+void bt81x_init(const bt81xcfg_t *config) {
   bt81x_cmd_clockext();
   bt81x_cmd_active();
   bt81x_cmd_active();
@@ -301,16 +319,14 @@ void bt81x_start() {
 
   // wait to be active
   while (rd8(REG_ID) != 0x7C) {
-    device_delay(5);
+    device_delay(50);
   }
 
   // wait for reset
   while (rd8(REG_CPURESET) != 0x0) {
-    device_delay(5);
+    device_delay(50);
   }
-}
 
-void bt81x_configure(const bt81xcfg_t *config) {
   // disable display
   wr16(REG_GPIOX, 0);
   wr8(REG_PCLK, 0);

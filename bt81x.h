@@ -41,8 +41,8 @@ struct bt81xcfg {
   uint16_t vsize;
 };
 
-extern const bt81xcfg_t bt81x_eve3_70;
-extern const bt81xcfg_t bt81x_eve2_70;
+extern const bt81xcfg_t rvt70eve3;
+extern const bt81xcfg_t unknown_eve;
 
 uint32_t bt81x_read_chipid();
 uint32_t bt81x_read_frequency();
@@ -55,8 +55,7 @@ void bt81x_cmd_sleep();
 void bt81x_cmd_powerdown();
 void bt81x_cmd_reset();
 
-void bt81x_start();
-void bt81x_configure(const bt81xcfg_t *config);
+void bt81x_init(const bt81xcfg_t *config);
 
 void bt81x_gfx_clear();
 void bt81x_demo_loop();
