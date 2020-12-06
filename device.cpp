@@ -12,55 +12,55 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "bt81x_device.h"
+#include "device.h"
 
 #include <Arduino.h>
 #include <SPI.h>
 
-void bt81x_init() {
+void device_init() {
   Serial.begin(9600);
   SPI.begin();
-  pinMode(BT81X_CS, OUTPUT);
+  pinMode(device_CS, OUTPUT);
 }
 
-void bt81x_delay(const uint32_t ms) {
+void device_delay(const uint32_t ms) {
   delay(ms);
 }
 
-void bt81x_spi_start() {
-  SPI.beginTransaction(SPISettings(BT81X_BAUD, MSBFIRST, SPI_MODE0));
-  digitalWrite(BT81X_CS, LOW);
+void device_spi_start() {
+  SPI.beginTransaction(SPISettings(device_BAUD, MSBFIRST, SPI_MODE0));
+  digitalWrite(device_CS, LOW);
 }
 
-void bt81x_spi_end() {
-  digitalWrite(BT81X_CS, HIGH);
+void device_spi_end() {
+  digitalWrite(device_CS, HIGH);
   SPI.endTransaction();
 }
 
-void bt81x_spi_read(uint8_t *data, const uint16_t size) {
+void device_spi_read(uint8_t *data, const uint16_t size) {
   for (int i = 0; i < size; ++i) {
     data[i] = SPI.transfer(0);
   }
 }
 
-uint8_t bt81x_spi_read8() {
+uint8_t device_spi_read8() {
   return SPI.transfer(0);
 }
 
-void bt81x_spi_write(const uint8_t *data, const uint16_t size) {
+void device_spi_write(const uint8_t *data, const uint16_t size) {
   for (int i = 0; i < size; ++i) {
     SPI.transfer(data[i]);
   }
 }
 
-void bt81x_spi_write8(const uint8_t data) {
+void device_spi_write8(const uint8_t data) {
   SPI.transfer(data);
 }
 
 #define LOG_BUFFER_SIZE 128
 char log_buffer[LOG_BUFFER_SIZE];
 
-void bt81x_logf(const char *format, ...) {
+void device_logf(const char *format, ...) {
   va_list args;
   va_start(args, format);
   vsnprintf(log_buffer, LOG_BUFFER_SIZE, format, args);

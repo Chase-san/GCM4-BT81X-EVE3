@@ -14,10 +14,10 @@ library
 This performs all actions needed to run and access the device. Display hardware
 specific code is stored here.
 
-### bt81x_device.h / bt81x_device.cpp
-The BT81X Device file is used to expose certain parts of the device code
-to the library code. This handles logging, SPI, and digital pins. This allows
-the library to run without specialized knowledge of it's host device.
+### device.h / device.cpp
+The device file is used to expose certain parts of the device code to the
+library code. This handles logging, SPI, and digital pins. This allows the
+library to run without specialized knowledge of it's host device.
 
 ## Functionality
 

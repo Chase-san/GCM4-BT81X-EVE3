@@ -13,8 +13,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #pragma once
-#ifndef __BT81X_DEVICE_H__
-#define __BT81X_DEVICE_H__
+#ifndef __DEVICE_H__
+#define __DEVICE_H__
 
 #include <stdint.h>
 
@@ -37,37 +37,37 @@ extern "C" {
  * Initializes anythis needed by the other commands to perform thier needed
  * function.
  */
-void bt81x_init();
+void device_init();
 
 /**
  * Performs a blocking delay of the given duration.
  * @param ms milliseconds to delay
  */
-void bt81x_delay(const uint32_t ms);
+void device_delay(const uint32_t ms);
 
 /**
  * Called at the start of an SPI transaction. Things such as mode, baudrate,
  * and chip select should be performed here.
  */
-void bt81x_spi_start();
+void device_spi_start();
 
 /**
  * Called after an SPI transaction.
  */
-void bt81x_spi_end();
+void device_spi_end();
 
-void bt81x_spi_read(uint8_t *data, const uint16_t size);
+void device_spi_read(uint8_t *data, const uint16_t size);
 
-uint8_t bt81x_spi_read8();
+uint8_t device_spi_read8();
 
-void bt81x_spi_write(const uint8_t *data, const uint16_t size);
+void device_spi_write(const uint8_t *data, const uint16_t size);
 
-void bt81x_spi_write8(const uint8_t data);
+void device_spi_write8(const uint8_t data);
 
-void bt81x_logf(const char *fmt, ...);
+void device_logf(const char *fmt, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __PLATFORM_H__ */
+#endif /* __DEVICE_H__ */

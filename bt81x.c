@@ -14,7 +14,7 @@
  */
 #include "bt81x.h"
 
-#include "bt81x_device.h"
+#include "device.h"
 
 #define ROM          0x200000
 #define ROM_FONT     0x1E0000
@@ -187,10 +187,10 @@ const bt81xcfg_t bt81x_eve2_70 = {
 void wr(const uint32_t address, const uint8_t *data, const uint16_t size) {
   const uint8_t addr[3] = {((address >> 16) & 0x3F) | 0x80,
                            (address >> 8) & 0xFF, address & 0xFF};
-  bt81x_spi_start();
-  bt81x_spi_write(addr, 3);
-  bt81x_spi_write(data, size);
-  bt81x_spi_end();
+  device_spi_start();
+  device_spi_write(addr, 3);
+  device_spi_write(data, size);
+  device_spi_end();
 }
 
 void wr8(const uint32_t address, const uint8_t data) {
@@ -211,10 +211,10 @@ void wr32(const uint32_t address, const uint32_t data) {
 void rd(const uint32_t address, uint8_t *data, const uint16_t size) {
   const uint8_t addr[4] = {(address >> 16) & 0x3F, (address >> 8) & 0xFF,
                            address & 0xFF, 0};
-  bt81x_spi_start();
-  bt81x_spi_write(addr, 4);
-  bt81x_spi_read(data, size);
-  bt81x_spi_end();
+  device_spi_start();
+  device_spi_write(addr, 4);
+  device_spi_read(data, size);
+  device_spi_end();
 }
 
 uint8_t rd8(const uint32_t address) {
@@ -242,19 +242,19 @@ void wdla(const uint32_t address, const uint32_t data) {
 }
 
 void host_command(const uint8_t cmd) {
-  bt81x_spi_start();
-  bt81x_spi_write8(cmd);
-  bt81x_spi_write8(0);
-  bt81x_spi_write8(0);
-  bt81x_spi_end();
+  device_spi_start();
+  device_spi_write8(cmd);
+  device_spi_write8(0);
+  device_spi_write8(0);
+  device_spi_end();
 }
 
 void host_command_param(const uint8_t cmd, const uint8_t param) {
-  bt81x_spi_start();
-  bt81x_spi_write8(cmd);
-  bt81x_spi_write8(param);
-  bt81x_spi_write8(0);
-  bt81x_spi_end();
+  device_spi_start();
+  device_spi_write8(cmd);
+  device_spi_write8(param);
+  device_spi_write8(0);
+  device_spi_end();
 }
 
 uint32_t bt81x_read_chipid() {
@@ -297,16 +297,16 @@ void bt81x_start() {
   bt81x_cmd_clockext();
   bt81x_cmd_active();
   bt81x_cmd_active();
-  bt81x_delay(300);
+  device_delay(300);
 
   // wait to be active
   while (rd8(REG_ID) != 0x7C) {
-    bt81x_delay(5);
+    device_delay(5);
   }
 
   // wait for reset
   while (rd8(REG_CPURESET) != 0x0) {
-    bt81x_delay(5);
+    device_delay(5);
   }
 }
 
